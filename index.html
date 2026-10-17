@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Филворды</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#222;--mute:#777;--line:#d9d6ce;--acc:#3b7de0;--sel:#ffd54a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1c1e;--card:#2a2a2d;--ink:#f0f0f0;--mute:#9a9a9f;--line:#3d3d42;--acc:#6aa2f5;--sel:#b8901a}}
+:root[data-theme="dark"]{--bg:#1c1c1e;--card:#2a2a2d;--ink:#f0f0f0;--mute:#9a9a9f;--line:#3d3d42;--acc:#6aa2f5;--sel:#b8901a}
+*{box-sizing:border-box}
+:root:root:root{--bg:rgba(18,24,56,.7);--card:rgba(24,32,72,.82);--ink:#eef0ff;--mute:#a9b0d8;--line:#3a4580;--acc:#8fb4ff;--sel:#b8901a}
+html{background:#0a0f2a}
+body{background:transparent}
+body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(circle at 86% 11%,#f6f2d8 0 13px,rgba(246,242,216,.28) 14px,transparent 70px),linear-gradient(#090e28,#1a2150 62%,#2c2a5c)}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:radial-gradient(1px 1px at 20px 30px,#fff,transparent),radial-gradient(1.5px 1.5px at 90px 70px,#dfe6ff,transparent),radial-gradient(1px 1px at 150px 20px,#fff,transparent),radial-gradient(1px 1px at 60px 140px,#fff,transparent),radial-gradient(1.5px 1.5px at 130px 120px,#fff,transparent),radial-gradient(1px 1px at 40px 90px,#fff,transparent),radial-gradient(1.5px 1.5px at 200px 160px,#fff,transparent),radial-gradient(1px 1px at 230px 40px,#dfe6ff,transparent);background-size:180px 180px,180px 180px,180px 180px,180px 180px,180px 180px,260px 260px,260px 260px,260px 260px;animation:twinkle 5s ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:.55}to{opacity:1}}
+input[type=range]{accent-color:var(--acc);width:130px}
+
+
+@media (prefers-reduced-motion:reduce){body::after{animation:none}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;align-items:center;padding:16px 12px 32px;-webkit-user-select:none;user-select:none}
+h1{font-size:24px;margin:4px 0 2px}
+.sub{color:var(--mute);font-size:14px;margin-bottom:12px;text-align:center}
+.bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
+button{font:inherit;font-size:14px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#grid{display:grid;gap:4px;width:min(92vw,420px);aspect-ratio:1;touch-action:none;background:var(--card);padding:8px;border-radius:16px;border:1px solid var(--line)}
+.c{display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--bg);font-weight:600;font-size:clamp(18px,6vw,28px);border:1px solid var(--line);transition:background .1s}
+.c.sel{background:var(--sel);color:#111}
+.c.ok{color:#fff;border-color:transparent}
+.c.hint{outline:3px solid var(--acc)}
+#words{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px;width:min(92vw,420px)}
+.w{padding:6px 12px;border-radius:999px;border:1px dashed var(--line);font-size:14px;color:var(--mute);letter-spacing:2px;min-width:70px;text-align:center}
+.w.f{border-style:solid;color:#fff;letter-spacing:1px;font-weight:600}
+#msg{margin-top:14px;min-height:24px;font-weight:600;text-align:center}
+#cur{height:28px;font-size:20px;font-weight:700;letter-spacing:3px;margin-bottom:6px}
+</style></head><body>
+<h1>Филворды</h1>
+<div class="sub">Проведите пальцем или мышкой по соседним буквам, чтобы составить слово. Каждая буква входит ровно в одно слово.</div>
+<div class="bar" id="sizes"></div>
+<div id="cur"></div>
+<div id="grid"></div>
+<div id="msg"></div>
+<div id="words"></div>
+<div class="bar" style="margin-top:14px"><button id="hintBtn">Подсказка</button><button id="showBtn">Показать слова</button><button id="newBtn">Новая игра</button><button id="musBtn">🎵 Музыка: выкл</button><label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mute)">🔊<input type="range" id="vol" min="0" max="100" value="70"></label></div>
+<script>
+var WORDS="кот дом лес сон мир нос рак лук мак сад жук дуб мед дым зуб лед мяч суп лев бык луна море река поле зима лето снег гора тень мост роза лиса волк окно небо рыба сова град цвет ветер дождь трава берег цветы птица туман осень весна книга свеча камыш радуга огонь ручей пруд облако дорога звезда подушка комета медведь листва сирень лошадь медуза скворец корабль пингвин ромашка зеркало".split(" ");
+var N=6,G,paths,solution,found,sel=[],drag=false,hintTimer,showW=false;
+function rnd(n){return Math.floor(Math.random()*n)}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=rnd(i+1),t=a[i];a[i]=a[j];a[j]=t}return a}
+function nb(i){var r=Math.floor(i/N),c=i%N,o=[];if(r>0)o.push(i-N);if(r<N-1)o.push(i+N);if(c>0)o.push(i-1);if(c<N-1)o.push(i+1);return o}
+function compsOk(g){var seen={},i;for(i=0;i<N*N;i++){if(g[i]!==-1||seen[i])continue;var st=[i],n=0;seen[i]=1;while(st.length){var x=st.pop();n++;nb(x).forEach(function(y){if(g[y]===-1&&!seen[y]){seen[y]=1;st.push(y)}})}if(n<3)return false}return true}
+function walk(g,s,L){var p=[s];g[s]=-2;function dfs(){if(p.length===L){if(compsOk(g))return true;return false}var last=p[p.length-1];var o=shuffle(nb(last));for(var k=0;k<o.length;k++){var y=o[k];if(g[y]===-1){g[y]=-2;p.push(y);if(dfs())return true;p.pop();g[y]=-1}}return false}
+if(dfs())return p;g[s]=-1;return null}
+function generate(){
+ var buckets={};WORDS.forEach(function(w){(buckets[w.length]=buckets[w.length]||[]).push(w)});
+ for(var t=0;t<2000;t++){
+  var g=[];for(var i=0;i<N*N;i++)g.push(-1);var ps=[],ok=true;
+  while(true){var s=g.indexOf(-1);if(s<0)break;var L=3+rnd(N>5?5:4);var p=walk(g,s,L);if(!p){ok=false;break}ps.push(p)}
+  if(!ok)continue;
+  var used={},ws=[],good=true;
+  for(var k=0;k<ps.length&&good;k++){var b=(buckets[ps[k].length]||[]).filter(function(w){return !used[w]});if(!b.length){good=false;break}var w=b[rnd(b.length)];used[w]=1;ws.push(w)}
+  if(!good)continue;
+  var letters=[];
+  ps.forEach(function(p,k){if(Math.random()<.5)p.reverse();p.forEach(function(c,j){letters[c]=ws[k][j].toUpperCase()})});
+  return{letters:letters,paths:ps,words:ws}
+ }
+}
+function build(){
+ var r=generate();G=r.letters;paths=r.paths;solution=r.words;found={};sel=[];
+ var grid=document.getElementById("grid");grid.style.gridTemplateColumns="repeat("+N+",1fr)";grid.innerHTML="";
+ G.forEach(function(l,i){var d=document.createElement("div");d.className="c";d.dataset.i=i;d.textContent=l;grid.appendChild(d)});
+ var wl=document.getElementById("words");wl.innerHTML="";
+ solution.forEach(function(w,k){var d=document.createElement("div");d.className="w";d.id="w"+k;d.textContent=showW?w:"•".repeat(w.length);wl.appendChild(d)});
+ document.getElementById("msg").textContent="";document.getElementById("cur").textContent="";
+}
+function cells(){return document.getElementById("grid").children}
+function show(){var cs=cells();for(var i=0;i<cs.length;i++)cs[i].classList.toggle("sel",sel.indexOf(i)>-1);document.getElementById("cur").textContent=sel.map(function(i){return G[i]}).join("")}
+function hit(e){var g=document.getElementById("grid"),cs=cells();var el=document.elementFromPoint(e.clientX,e.clientY);if(!el||!el.classList.contains("c"))return -1;var r=el.getBoundingClientRect();var dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);if(Math.hypot(dx,dy)>r.width*.48)return -1;return +el.dataset.i}
+function add(i){if(i<0)return;var cs=cells();if(cs[i].classList.contains("ok"))return;var n=sel.length;if(n&&sel[n-2]===i){sel.pop();show();return}if(sel.indexOf(i)>-1)return;if(n&&nb(sel[n-1]).indexOf(i)<0)return;sel.push(i);show()}
+function finish(){
+ var s=sel.map(function(i){return G[i].toLowerCase()}).join(""),r=s.split("").reverse().join("");
+ var k=-1;solution.forEach(function(w,j){if(!found[j]&&(w===s||w===r))k=j});
+ if(k>=0){found[k]=1;var hue=(k*47)%360,cs=cells();sel.forEach(function(i){cs[i].classList.add("ok");cs[i].style.background="hsl("+hue+" 55% 48%)"});var w=document.getElementById("w"+k);w.textContent=solution[k];w.classList.add("f");w.style.background="hsl("+hue+" 55% 48%)";
+  if(Object.keys(found).length===solution.length)document.getElementById("msg").textContent="Победа! Все слова найдены 🎉"; else document.getElementById("msg").textContent="Найдено: "+Object.keys(found).length+" из "+solution.length}else if(s.length>1){document.getElementById("msg").textContent="«"+s.toUpperCase()+"» — такого слова здесь нет"}
+ sel=[];show();document.getElementById("cur").textContent=""}
+var gr=document.getElementById("grid");
+gr.addEventListener("pointerdown",function(e){drag=true;lp={x:e.clientX,y:e.clientY};sel=[];add(hit(e));e.preventDefault()});
+var lp=null;
+gr.addEventListener("pointermove",function(e){if(!drag)return;var x=e.clientX,y=e.clientY;if(lp){var d=Math.hypot(x-lp.x,y-lp.y),n=Math.max(1,Math.ceil(d/6));for(var s=1;s<=n;s++)add(hit({clientX:lp.x+(x-lp.x)*s/n,clientY:lp.y+(y-lp.y)*s/n}))}else add(hit(e));lp={x:x,y:y}});
+window.addEventListener("pointercancel",function(){if(drag){drag=false;finish()}});
+window.addEventListener("pointerup",function(){if(drag){drag=false;finish()}});
+document.getElementById("newBtn").onclick=build;
+document.getElementById("hintBtn").onclick=function(){
+ var left=[];solution.forEach(function(w,k){if(!found[k])left.push(k)});if(!left.length)return;
+ var k=left[rnd(left.length)],c=cells()[paths[k][0]];c.classList.add("hint");clearTimeout(hintTimer);hintTimer=setTimeout(function(){c.classList.remove("hint")},2500)};
+document.getElementById("showBtn").onclick=function(){showW=!showW;this.textContent=showW?"Скрыть слова":"Показать слова";solution.forEach(function(w,k){if(!found[k])document.getElementById("w"+k).textContent=showW?w:"•".repeat(w.length)})};
+var sz=document.getElementById("sizes");
+[5,6,7].forEach(function(n){var b=document.createElement("button");b.textContent=n+"×"+n;if(n===N)b.className="on";b.onclick=function(){N=n;[].forEach.call(sz.children,function(x){x.classList.remove("on")});b.classList.add("on");build()};sz.appendChild(b)});
+var mc,mm,mOn=false,mTimer,nc=0,nn=0,ci=0;
+var CH=[[110,220,261.63,329.63],[87.31,174.61,220,261.63],[130.81,196,261.63,329.63],[98,196,246.94,293.66]],PEN=[220,261.63,293.66,329.63,392,440,523.25,659.25];
+function tone(f,t,dur,vol,type,att){var o=mc.createOscillator(),g=mc.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+att);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(mm);o.start(t);o.stop(t+dur+.1)}
+function sched(){var now=mc.currentTime;while(nc<now+1){CH[ci%4].forEach(function(f){tone(f,nc,9,.1,"sine",2.5);tone(f*2,nc,9,.06,"sine",3)});ci++;nc+=8}while(nn<now+1){tone(PEN[rnd(PEN.length)],nn,3.2,.28,"triangle",.02);nn+=1.2+Math.random()*2.2}}
+document.getElementById("musBtn").onclick=function(){
+ mOn=!mOn;this.textContent=mOn?"🎵 Музыка: вкл":"🎵 Музыка: выкл";
+ if(mOn){
+  if(!mc){try{var A=window.AudioContext||window.webkitAudioContext;mc=new A();mm=mc.createGain();mm.gain.value=0;var lp=mc.createBiquadFilter();lp.type="lowpass";lp.frequency.value=1800;var dl=mc.createDelay(1);dl.delayTime.value=.45;var fb=mc.createGain();fb.gain.value=.42;mm.connect(lp);lp.connect(mc.destination);lp.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(mc.destination)}catch(e){mc=null;mOn=false;this.textContent="🎵 Музыка недоступна";return}}
+  if(mc.state==="suspended")mc.resume();
+  nc=nn=mc.currentTime+.1;sched();clearInterval(mTimer);mTimer=setInterval(sched,400);mm.gain.setTargetAtTime(mv*1.6,mc.currentTime,.5);
+ }else if(mc){clearInterval(mTimer);mm.gain.setTargetAtTime(0,mc.currentTime,.4)}
+};
+var mv=.7;
+document.getElementById("vol").oninput=function(){mv=this.value/100;if(mc&&mOn)mm.gain.setTargetAtTime(mv*1.6,mc.currentTime,.05)};
+build();
+</script></body></html>
